@@ -52,7 +52,6 @@ forge script --rpc-url $RPC \
     --verifier blockscout \
     --verifier-url $BLOCKSCOUT$APIKEY \
     --sig "deploy(bool _useMainnet)" \
-    script/SampleCollectionERC721.s.sol:SampleCollectionERC721Script \
+    script/ERC721Migration.s.sol:ERC721MigrationScript \
     $USEMAINNET
-
 
