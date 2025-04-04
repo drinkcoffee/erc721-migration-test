@@ -8,10 +8,19 @@ import {SampleERC721} from "../src/SampleERC721.sol";
 import {SampleERC721Bootstrap} from "../src/SampleERC721Bootstrap.sol";
 import {IImmutableERC721, IImmutableERC721Errors} from "@imtbl/contracts/token/erc721/interfaces/IImmutableERC721.sol";
 import {ImmutableERC721MintByIDBootstrapV3} from "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
+import {ImmutableERC721MintByIDUpgradeableV3} from "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDUpgradeableV3.sol";
 import {OperatorAllowlistUpgradeable} from "@imtbl/contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {DeployOperatorAllowlist} from "@imtbl/test/utils/DeployAllowlistProxy.sol";
 import {ERC1967Proxy} from "@openzeppelin-contracts-4/proxy/ERC1967/ERC1967Proxy.sol";
 import {ERC721Upgradeable} from "@openzeppelin-contracts-upgradeable-4/token/ERC721/ERC721Upgradeable.sol";
+
+
+contract SampleERC721V2 is ImmutableERC721MintByIDUpgradeableV3 {
+    // solhint-disable-next-line no-empty-blocks
+    function _authorizeUpgrade(address /* newImplementation */) internal pure override {
+    }
+}
+
 
 contract ERC721MigrationTest is Test {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
@@ -190,4 +199,21 @@ contract ERC721MigrationTest is Test {
         assertEq(erc721.ownerOf(1001), user2, "Owner of 1001 after upgrade");
         assertEq(erc721.ownerOf(1002), user3, "Owner of 1002 after upgrade");
     }
+
+    function testNoFurtherUpgrade() public {
+       SampleERC721V2 erc721ImplV2 = new SampleERC721V2();
+
+        // Execute upgrade from bootstrap to SampleERC721
+        // A function must be called, so just call the balanceOf view function.
+        bytes memory initData = abi.encodeWithSelector(ERC721Upgradeable.balanceOf.selector, address(1));
+        vm.prank(owner);
+        erc721Bootstrap.upgradeToAndCall(address(erc721Impl), initData);
+        assertEq(erc721Bootstrap.version(), 1, "version");
+
+        // Attempt to upgrade from SampleERC721 to SampleERC721V2
+        vm.prank(owner);
+        vm.expectRevert(SampleERC721.NoUpgradesAllowed.selector);
+        erc721Bootstrap.upgradeToAndCall(address(erc721ImplV2), initData);
+    }
+
 }
