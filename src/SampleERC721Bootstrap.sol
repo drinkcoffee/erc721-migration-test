@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: MIT License
 pragma solidity >=0.8.19 <0.8.29;
 
-import {ImmutableERC721MintByIDBootstrapV3} from "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
+import {ImmutableERC721MintByIDBootstrapV3} from
+    "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
 
 contract SampleERC721Bootstrap is ImmutableERC721MintByIDBootstrapV3 {
     bytes32 private constant _MINTER_ROLE = bytes32("MINTER_ROLE");
@@ -32,9 +33,8 @@ contract SampleERC721Bootstrap is ImmutableERC721MintByIDBootstrapV3 {
         uint96 feeNumerator_
     ) public virtual {
         super.initialize(
-            owner_, name_, symbol_, baseURI_, contractURI_, operatorAllowlist_,
-            royaltyReceiver_,
-             feeNumerator_);
+            owner_, name_, symbol_, baseURI_, contractURI_, operatorAllowlist_, royaltyReceiver_, feeNumerator_
+        );
         _grantRole(_MINTER_ROLE, minter_);
     }
 }

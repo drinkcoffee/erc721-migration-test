@@ -7,20 +7,19 @@ import "forge-std/Test.sol";
 import {SampleERC721} from "../src/SampleERC721.sol";
 import {SampleERC721Bootstrap} from "../src/SampleERC721Bootstrap.sol";
 import {IImmutableERC721, IImmutableERC721Errors} from "@imtbl/contracts/token/erc721/interfaces/IImmutableERC721.sol";
-import {ImmutableERC721MintByIDBootstrapV3} from "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
-import {ImmutableERC721MintByIDUpgradeableV3} from "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDUpgradeableV3.sol";
+import {ImmutableERC721MintByIDBootstrapV3} from
+    "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
+import {ImmutableERC721MintByIDUpgradeableV3} from
+    "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDUpgradeableV3.sol";
 import {OperatorAllowlistUpgradeable} from "@imtbl/contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {DeployOperatorAllowlist} from "@imtbl/test/utils/DeployAllowlistProxy.sol";
 import {ERC1967Proxy} from "@openzeppelin-contracts-4/proxy/ERC1967/ERC1967Proxy.sol";
 import {ERC721Upgradeable} from "@openzeppelin-contracts-upgradeable-4/token/ERC721/ERC721Upgradeable.sol";
 
-
 contract SampleERC721V2 is ImmutableERC721MintByIDUpgradeableV3 {
     // solhint-disable-next-line no-empty-blocks
-    function _authorizeUpgrade(address /* newImplementation */) internal pure override {
-    }
+    function _authorizeUpgrade(address /* newImplementation */ ) internal pure override {}
 }
-
 
 contract ERC721MigrationTest is Test {
     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
@@ -83,20 +82,26 @@ contract ERC721MigrationTest is Test {
         user2 = makeAddr("user2");
         user3 = makeAddr("user3");
 
-
-       SampleERC721Bootstrap bootstrapImpl = new SampleERC721Bootstrap();
-       erc721Impl = new SampleERC721();
+        SampleERC721Bootstrap bootstrapImpl = new SampleERC721Bootstrap();
+        erc721Impl = new SampleERC721();
 
         bytes memory initData = abi.encodeWithSelector(
-            SampleERC721Bootstrap.initialize.selector, 
-            owner, minter, name, symbol, baseURI, contractURI, address(allowlist), feeReceiver, feeNumerator
+            SampleERC721Bootstrap.initialize.selector,
+            owner,
+            minter,
+            name,
+            symbol,
+            baseURI,
+            contractURI,
+            address(allowlist),
+            feeReceiver,
+            feeNumerator
         );
         proxy = new ERC1967Proxy(address(bootstrapImpl), initData);
 
         erc721 = IImmutableERC721(address(proxy));
         erc721Bootstrap = SampleERC721Bootstrap(address(proxy));
     }
-
 
     function testEverything() public {
         // Mint some NFTs
@@ -129,7 +134,6 @@ contract ERC721MigrationTest is Test {
         assertEq(erc721.ownerOf(1001), user2, "Owner of 1001 after initial mint");
         assertEq(erc721.ownerOf(1002), user2, "Owner of 1002 after initial mint");
 
-
         // Set fee for NFTs 1000 to 1002 to 5%
         uint256[] memory nfts = new uint256[](3);
         for (uint256 i = 0; i < nfts.length; i++) {
@@ -142,29 +146,23 @@ contract ERC721MigrationTest is Test {
             (address receiver, uint256 royaltyAmount) = erc721.royaltyInfo(i, 10000);
             assertEq(receiver, feeReceiver, "Wrong receiver1");
             assertEq(royaltyAmount, feeNumerator, "Wrong fee1");
-        }    
+        }
         for (uint256 i = 1000; i < 103; i++) {
             (address receiver, uint256 royaltyAmount) = erc721.royaltyInfo(i, 10000);
             assertEq(receiver, feeReceiver, "Wrong receiver2");
             assertEq(royaltyAmount, otherFeeNumerator, "Wrong fee2");
-        }    
-
+        }
 
         // Change ownership of some NFTs
-        ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest[] memory requests = new ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest[](2);
-        ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest memory request1 = ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest({
-            from: user1,
-            to: user3,
-            tokenId: 100
-        });
-        ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest memory request2 = ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest({
-            from: user2,
-            to: user3,
-            tokenId: 1002
-        });
+        ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest[] memory requests =
+            new ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest[](2);
+        ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest memory request1 =
+            ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest({from: user1, to: user3, tokenId: 100});
+        ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest memory request2 =
+            ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest({from: user2, to: user3, tokenId: 1002});
         requests[0] = request1;
         requests[1] = request2;
-        
+
         vm.prank(owner);
         erc721Bootstrap.bootstrapPhaseChangeOwnership(requests);
 
@@ -201,7 +199,7 @@ contract ERC721MigrationTest is Test {
     }
 
     function testNoFurtherUpgrade() public {
-       SampleERC721V2 erc721ImplV2 = new SampleERC721V2();
+        SampleERC721V2 erc721ImplV2 = new SampleERC721V2();
 
         // Execute upgrade from bootstrap to SampleERC721
         // A function must be called, so just call the balanceOf view function.
@@ -215,5 +213,4 @@ contract ERC721MigrationTest is Test {
         vm.expectRevert(SampleERC721.NoUpgradesAllowed.selector);
         erc721Bootstrap.upgradeToAndCall(address(erc721ImplV2), initData);
     }
-
 }
