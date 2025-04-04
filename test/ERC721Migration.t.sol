@@ -43,6 +43,7 @@ contract ERC721MigrationTest is Test {
     string public baseURI;
     string public contractURI;
     uint96 public feeNumerator;
+    uint96 public otherFeeNumerator;
 
     address public user1;
     address public user2;
@@ -62,6 +63,7 @@ contract ERC721MigrationTest is Test {
         baseURI = BASE_URI;
         contractURI = CONTRACT_URI;
         feeNumerator = 200; // 2%
+        otherFeeNumerator = 500; // 5%
 
         DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
         address proxyAddr =
@@ -117,6 +119,27 @@ contract ERC721MigrationTest is Test {
         assertEq(erc721.ownerOf(103), user2, "Owner of 103 after initial mint");
         assertEq(erc721.ownerOf(1001), user2, "Owner of 1001 after initial mint");
         assertEq(erc721.ownerOf(1002), user2, "Owner of 1002 after initial mint");
+
+
+        // Set fee for NFTs 1000 to 1002 to 5%
+        uint256[] memory nfts = new uint256[](3);
+        for (uint256 i = 0; i < nfts.length; i++) {
+            nfts[i] = 1000 + i;
+        }
+        vm.prank(minter);
+        erc721.setNFTRoyaltyReceiverBatch(nfts, feeReceiver, otherFeeNumerator);
+
+        for (uint256 i = 100; i < 104; i++) {
+            (address receiver, uint256 royaltyAmount) = erc721.royaltyInfo(i, 10000);
+            assertEq(receiver, feeReceiver, "Wrong receiver1");
+            assertEq(royaltyAmount, feeNumerator, "Wrong fee1");
+        }    
+        for (uint256 i = 1000; i < 103; i++) {
+            (address receiver, uint256 royaltyAmount) = erc721.royaltyInfo(i, 10000);
+            assertEq(receiver, feeReceiver, "Wrong receiver2");
+            assertEq(royaltyAmount, otherFeeNumerator, "Wrong fee2");
+        }    
+
 
         // Change ownership of some NFTs
         ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest[] memory requests = new ImmutableERC721MintByIDBootstrapV3.BootstrapTransferRequest[](2);
