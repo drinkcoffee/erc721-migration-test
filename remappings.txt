@@ -1,2 +1,4 @@
-@imtbl/=lib/contracts/
-openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
+@openzeppelin-contracts-upgradeable-4/=lib/openzeppelin-contracts-upgradeable-4/contracts/
+@openzeppelin-contracts-4/=lib/openzeppelin-contracts-4/contracts/
+openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4/contracts/
+@imtbl/=lib/contracts.git/
