@@ -21,8 +21,10 @@ The following is the list of commands used to create this repo.
   - `forge install openzeppelin-contracts-4=https://github.com/OpenZeppelin/openzeppelin-contracts@v4.9.3  --no-commit
 - Add `./remappings.txt` with contents:
 ```
+@openzeppelin-contracts-upgradeable-4/=lib/openzeppelin-contracts-upgradeable-4/contracts/
+@openzeppelin-contracts-4/=lib/openzeppelin-contracts-4/contracts/
+openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4/contracts/
 @imtbl/=lib/contracts.git/
-openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
 ```
 - Update `./.gitignore` to ignore Apple file and to igore the `broadcast` directory. Go from:
 ```
