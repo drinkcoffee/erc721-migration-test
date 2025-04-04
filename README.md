@@ -1,19 +1,67 @@
-## Foundry
+# ERC721 migration example
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This is an example repo showing how to use the (draft) Immutable ERC721 Bootstrap and ERC721v3 upgradeable contract to do a migration.
 
-Foundry consists of:
+## Command Sequence
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+The following is the list of commands used to create this repo.
 
-## Documentation
+- Create repo in github. 
+- Clone the repo.
+- Init Foundry project: 
+  - `forge init --force`
+- Install Immtuable's contracts repo on branch **peter-upgradeable-erc721**:
+  - `forge install https://github.com/immutable/contracts.git@peter-upgradeable-erc721  --no-commit`
+- Install Open Zeppelin's upgradeable contracts repo:
+  - `forge install https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable  --no-commit`
+- Install Open Zeppelin's upgradeable contracts repo for version 4.9.3:
+  - `forge install openzeppelin-contracts-upgradeable-4.9.3=https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable@v4.9.3  --no-commit`
+- Add `./remappings.txt` with contents:
+```
+@imtbl/=lib/contracts/
+openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
+```
+- Update `./.gitignore` to ignore Apple file and to igore the `broadcast` directory. Go from:
+```
+# Compiler files
+cache/
+out/
 
-https://book.getfoundry.sh/
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
 
-## Usage
+# Docs
+docs/
+
+# Dotenv file
+.env
+```
+to:
+```
+# Compiler files
+cache/
+out/
+
+# Ignores development broadcast logs
+/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+.DS_Store
+```
+- Remove `Counter` example contract, tests, and script from the src, test, and script directories.
+- Add SampleCollectionERC721 contract, tests, and script to the src, test, and script directories.
+
+
+
 
 ### Build
 
@@ -21,41 +69,17 @@ https://book.getfoundry.sh/
 $ forge build
 ```
 
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
 ### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
+Not that `script/deploy.sh` needs small modifications to switch between mainnet and testnet. It also has instructions if deploying using a Ledger hardware wallet.
 
 ```shell
-$ cast <subcommand>
+$ export PKEY=<your key>
+$ export APIKEY=<your blockscout test net or mainnet API key>
+$ sh script/deploy.sh
 ```
+
+
 
 ### Help
 
@@ -64,3 +88,4 @@ $ forge --help
 $ anvil --help
 $ cast --help
 ```
+
