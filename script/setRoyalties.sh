@@ -21,6 +21,8 @@ echo RPC URL: $RPC
 echo Blockscout API Key: $APIKEY
 echo Blockscout URI: $BLOCKSCOUT$APIKEY
 echo Use Mainnet: $USEMAINNET
+echo Proxy / ERC721: $PROXY
+echo Token Id to setRoyalty for: $TOKENID
 
 if [ -z "${PKEY}" ]; then
     echo "Error: PKEY environment variable is not set"
@@ -28,6 +30,14 @@ if [ -z "${PKEY}" ]; then
 fi
 if [ -z "${APIKEY}" ]; then
     echo "Error: APIKEY environment variable is not set"
+    exit 1
+fi
+if [ -z "${PROXY}" ]; then
+    echo "Error: PROXY environment variable is not set"
+    exit 1
+fi
+if [ -z "${TOKENID}" ]; then
+    echo "Error: TOKENID environment variable is not set"
     exit 1
 fi
 
@@ -51,7 +61,7 @@ forge script --rpc-url $RPC \
     --verify \
     --verifier blockscout \
     --verifier-url $BLOCKSCOUT$APIKEY \
-    --sig "deployBootstrap(bool _useMainnet)" \
+    --sig "setRoyalties(address _proxy, uint256 _tokenId)" \
     script/ERC721Migration.s.sol:ERC721MigrationScript \
-    $USEMAINNET
+    $PROXY $TOKENID
 

@@ -21,6 +21,8 @@ echo RPC URL: $RPC
 echo Blockscout API Key: $APIKEY
 echo Blockscout URI: $BLOCKSCOUT$APIKEY
 echo Use Mainnet: $USEMAINNET
+echo Proxy / ERC721: $PROXY
+echo ERC721 Implementation: $ERC721
 
 if [ -z "${PKEY}" ]; then
     echo "Error: PKEY environment variable is not set"
@@ -30,6 +32,15 @@ if [ -z "${APIKEY}" ]; then
     echo "Error: APIKEY environment variable is not set"
     exit 1
 fi
+if [ -z "${PROXY}" ]; then
+    echo "Error: PROXY environment variable is not set"
+    exit 1
+fi
+if [ -z "${ERC721}" ]; then
+    echo "Error: ERC721 environment variable is not set"
+    exit 1
+fi
+
 
 # To switch from private key environment variable to private key in ledger:
 # Remove: 
@@ -51,7 +62,7 @@ forge script --rpc-url $RPC \
     --verify \
     --verifier blockscout \
     --verifier-url $BLOCKSCOUT$APIKEY \
-    --sig "deployBootstrap(bool _useMainnet)" \
+    --sig "upgrade(address _proxy, address _erc721Impl)" \
     script/ERC721Migration.s.sol:ERC721MigrationScript \
-    $USEMAINNET
+    $PROXY $ERC721
 

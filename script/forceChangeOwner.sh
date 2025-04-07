@@ -21,6 +21,9 @@ echo RPC URL: $RPC
 echo Blockscout API Key: $APIKEY
 echo Blockscout URI: $BLOCKSCOUT$APIKEY
 echo Use Mainnet: $USEMAINNET
+echo Proxy / ERC721: $PROXY
+echo Token Id to force change owner for: $TOKENID
+echo New owner for force chain: $NEWOWNER
 
 if [ -z "${PKEY}" ]; then
     echo "Error: PKEY environment variable is not set"
@@ -30,6 +33,19 @@ if [ -z "${APIKEY}" ]; then
     echo "Error: APIKEY environment variable is not set"
     exit 1
 fi
+if [ -z "${PROXY}" ]; then
+    echo "Error: PROXY environment variable is not set"
+    exit 1
+fi
+if [ -z "${TOKENID}" ]; then
+    echo "Error: TOKENID environment variable is not set"
+    exit 1
+fi
+if [ -z "${NEWOWNER}" ]; then
+    echo "Error: NEWOWNER environment variable is not set"
+    exit 1
+fi
+
 
 # To switch from private key environment variable to private key in ledger:
 # Remove: 
@@ -51,7 +67,7 @@ forge script --rpc-url $RPC \
     --verify \
     --verifier blockscout \
     --verifier-url $BLOCKSCOUT$APIKEY \
-    --sig "deployBootstrap(bool _useMainnet)" \
+    --sig "bootstrapChangeOwnership(address _proxy, uint256 _tokenId, address _newOwner)" \
     script/ERC721Migration.s.sol:ERC721MigrationScript \
-    $USEMAINNET
+    $PROXY $TOKENID $NEWOWNER
 
