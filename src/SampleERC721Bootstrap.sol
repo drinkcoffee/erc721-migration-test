@@ -4,8 +4,13 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {ImmutableERC721MintByIDBootstrapV3} from
     "@imtbl/contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {ERC721Upgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/token/ERC721/ERC721Upgradeable.sol";
+
 
 contract SampleERC721Bootstrap is ImmutableERC721MintByIDBootstrapV3 {
+    using Strings for uint256;
+
     bytes32 private constant _MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /**
@@ -36,5 +41,16 @@ contract SampleERC721Bootstrap is ImmutableERC721MintByIDBootstrapV3 {
             owner_, name_, symbol_, baseURI_, contractURI_, operatorAllowlist_, royaltyReceiver_, feeNumerator_
         );
         _grantRole(_MINTER_ROLE, minter_);
+    }
+
+    /**
+     * Have tokenURI return:
+     *  baseURI <token id> .json
+     */
+    function tokenURI(uint256 tokenId) public view override(ERC721Upgradeable) returns (string memory) {
+        _requireMinted(tokenId);
+
+        string memory baseURI = _baseURI();
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString(), ".json")) : "";
     }
 }

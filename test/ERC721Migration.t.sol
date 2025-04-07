@@ -213,4 +213,10 @@ contract ERC721MigrationTest is Test {
         vm.expectRevert(SampleERC721.NoUpgradesAllowed.selector);
         erc721Bootstrap.upgradeToAndCall(address(erc721ImplV2), initData);
     }
+
+    function testTokenUri() public {
+        vm.prank(minter);
+        erc721.mint(user1, 103);
+        assertEq(erc721.tokenURI(103), "https://drinkcoffee.github.io/projects/nfts/103.json", "Wrong URI");
+    }
 }
