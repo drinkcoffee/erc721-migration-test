@@ -2,6 +2,51 @@
 
 This is an example repo showing how to use the (draft) Immutable ERC721 Bootstrap and ERC721v3 upgradeable contract to do a migration.
 
+# Process for migration
+The following steps should be followed to demonstrate a migration.
+
+* Deploy the ERC721 proxy and bootstrap. Set-up required environment variables and then:
+```
+sh script/deployBootstrap.sh
+```
+* Set the contracts up in hub. Both the proxy and bootstrap contract must be added to a project using the Link Contract feature.
+* Grant minter role on the contract. Note the call is to the proxy contract. Set-up required environment variables and then:
+```
+sh script/grantMinterRole.sh
+```
+* Mint a single NFT using the Minting API.
+```
+sh script/mintNFTs.sh
+```
+* Go to Blockscout and confirm that you can see the NFT graphics when using the token view for the proxy contract. For instance: https://explorer.testnet.immutable.com/token/0xE040E3810db20d791D4823afD1327438a7B48cD4 Doing this ensures the linkage has been correctly set-up between the proxy and the bootstrap contract.
+* Go to Blockscout to confirm that a call to transferFrom fails on the proxy contract fails. Doing this ensures that the bootstrap contract has been deployed, and not mistakenly an operational ERC721 contract.
+* Mint NFTs using the Minting API. The script needs to be editted for each NFT. Ensure token ids and reference ids are unique. Call:
+```
+sh script/mintNFTs.sh
+```
+* Set royalties that will be non-standard. This script only sets one NFT at a time. 
+```
+sh script/setRoyalties.sh
+```
+* Force change ownership of NFTs. This script only changes one NFT at a time.
+```
+sh script/forceChangeOwnership.sh
+```
+* Deploy the upgradeable ERC721 contract.
+```
+sh script/deployERC721.sh
+```
+* Add the newly deployed ERC721 implementation to Hub using the Link Contract feature.
+* Upgrade the proxy contract.
+```
+sh script/upgrade.sh
+```
+* Go to Blockscout and confirm that the implementation contract for the proxy is now the newly deployed ERC721.
+* Go to blockscout and confirm that a call to transferFrom works.
+* Go to hub and unlink the bootstrap contract.
+
+
+
 ## Command Sequence
 
 The following is the list of commands used to create this repo.

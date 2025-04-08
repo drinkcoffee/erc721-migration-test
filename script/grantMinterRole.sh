@@ -1,4 +1,5 @@
 #!/bin/bash
+# Grant the minter role to the Minter API
 useMainNet=0
 
 if [ useMainNet -eq 1 ]
@@ -13,6 +14,10 @@ else
     BLOCKSCOUT=https://explorer.testnet.immutable.com/api?
     USEMAINNET=false
 fi
+if [ -z "${PROXY}" ]; then
+    echo "Error: PROXY environment variable is not set"
+    exit 1
+fi
 
 
 
@@ -21,10 +26,7 @@ echo RPC URL: $RPC
 echo Blockscout API Key: $APIKEY
 echo Blockscout URI: $BLOCKSCOUT$APIKEY
 echo Use Mainnet: $USEMAINNET
-echo USER1: $USER1
-echo USER2: $USER2
-echo ERC721 Proxy Contract: $ERC721
-
+echo Proxy / ERC721: $PROXY
 
 if [ -z "${PKEY}" ]; then
     echo "Error: PKEY environment variable is not set"
@@ -55,7 +57,7 @@ forge script --rpc-url $RPC \
     --verify \
     --verifier blockscout \
     --verifier-url $BLOCKSCOUT$APIKEY \
-    --sig "mint(bool _useMainnet)" \
+    --sig "grantMinterRole(bool _mainnet, address _proxy)" \
     script/ERC721Migration.s.sol:ERC721MigrationScript \
-    $ERC721 $USER1 $USER2
+    $USEMAINNET $PROXY
 

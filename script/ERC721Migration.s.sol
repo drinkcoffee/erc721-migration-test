@@ -16,8 +16,14 @@ import {ERC1967Proxy} from "@openzeppelin-contracts-4/proxy/ERC1967/ERC1967Proxy
 import {ERC721Upgradeable} from "@openzeppelin-contracts-upgradeable-4/token/ERC721/ERC721Upgradeable.sol";
 
 contract ERC721MigrationScript is Script {
+    // Fetch latest values from: 
+    // https://api.immutable.com/v1/chains
+    // https://api.sandbox.immutable.com/v1/chains
     address constant MAINNET_OPERATOR_ALLOWLIST = 0x5F5EBa8133f68ea22D712b0926e2803E78D89221;
     address constant TESTNET_OPERATOR_ALLOWLIST = 0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE;
+    address constant MAINNET_MINTER_API_MINTER = 0xbb7ee21AAaF65a1ba9B05dEe234c5603C498939E;
+    address constant TESTNET_MINTER_API_MINTER = 0x9CcFbBaF5509B1a03826447EaFf9a0d1051Ad0CF;
+
     address constant OWNER = 0xE0069DDcAd199C781D54C0fc3269c94cE90364E2;
 
     function setUp() public {}
@@ -57,6 +63,22 @@ contract ERC721MigrationScript is Script {
         vm.stopBroadcast();
 
         console.log("Deploy bootstrap and proxy complete");
+    }
+
+    // The Minter API's address must be granted minter role prior to minting.
+    function grantMinterRole(bool _mainnet, address _proxy) public {
+        address minter = _mainnet ? MAINNET_MINTER_API_MINTER : TESTNET_MINTER_API_MINTER;
+
+        IImmutableERC721 erc721Bootstrap = IImmutableERC721(_proxy);
+
+        bytes32 MINTER_ROLE = erc721Bootstrap.MINTER_ROLE();
+
+        // Must be called by owner
+        vm.startBroadcast();
+        erc721Bootstrap.grantRole(MINTER_ROLE, minter);
+        vm.stopBroadcast();
+
+        console.log("grantMinterRole complete");
     }
 
 
@@ -116,7 +138,6 @@ contract ERC721MigrationScript is Script {
     
 
     function upgrade(address _proxy, address _erc721Impl) public {
-        vm.startBroadcast();
         SampleERC721Bootstrap erc721Bootstrap = SampleERC721Bootstrap(_proxy);
 
         // Execute upgrade
